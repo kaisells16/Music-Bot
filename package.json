@@ -18,10 +18,12 @@
   "engines": {
     "node": "20.x"
   },
-  "dependencies": {
-    "discord.js": "^14.13.0",
-    "distube": "^4.2.0",
-    "@distube/spotify": "^1.4.2",
-    "ytdl-core": "^4.11.0"
+"dependencies": {
+  "discord.js": "^14.13.0",
+  "distube": "^4.2.0",
+  "@distube/spotify": "^1.4.2",
+  "ytdl-core": "^4.11.0",
+  "@discordjs/voice": "^0.16.0"
+}
   }
 }
