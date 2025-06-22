@@ -1,13 +1,27 @@
 {
   "name": "music-bot",
   "version": "1.0.0",
+  "description": "Moderate Music Bot for Discord with Spotify and YouTube support using DisTube",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
+  "keywords": [
+    "discord",
+    "music",
+    "spotify",
+    "youtube",
+    "distube"
+  ],
+  "author": "Yash",
+  "license": "MIT",
+  "engines": {
+    "node": "18.x"
+  },
   "dependencies": {
-  "discord.js": "^14.13.0",
-  "distube": "^4.2.0",
-  "@distube/spotify": "^1.4.2",
-  "ytdl-core": "^4.11.0"
+    "discord.js": "^14.13.0",
+    "distube": "^4.2.0",
+    "@distube/spotify": "^1.4.2",
+    "ytdl-core": "^4.11.0"
+  }
 }
