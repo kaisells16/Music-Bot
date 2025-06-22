@@ -1,8 +1,7 @@
-const { Client, GatewayIntentBits, Collection } = require('discord.js');
+const { Client, GatewayIntentBits, ActivityType } = require('discord.js');
 const { DisTube } = require('distube');
 const { SpotifyPlugin } = require('@distube/spotify');
-
-const PREFIX = '.'; // Custom prefix for commands
+require('dotenv').config();
 
 const client = new Client({
   intents: [
@@ -13,13 +12,7 @@ const client = new Client({
   ]
 });
 
-// Load command files
-client.commands = new Collection();
-['play', 'pause', 'resume', 'skip', 'queue', 'stop'].forEach(cmd => {
-  client.commands.set(cmd, require(`./commands/${cmd}.js`));
-});
-
-// ✅ DisTube setup WITHOUT Spotify API
+// 🎵 Initialize DisTube with Spotify (no API keys needed)
 const distube = new DisTube(client, {
   emitNewSongOnly: true,
   leaveOnEmpty: true,
@@ -32,59 +25,64 @@ const distube = new DisTube(client, {
   youtubeDL: false
 });
 
-client.distube = distube;
+// ✅ On Ready
+client.once('ready', () => {
+  console.log(`${client.user.tag} is online!`);
 
-// ✅ DisTube Error Handling
-distube.on("error", (channel, error) => {
-  console.error("❌ DisTube Error:", error);
-  if (channel) channel.send("⚠️ Error while playing music.");
+  // Dynamic status showing total server count
+  let statuses = [
+    () => `🎧 In ${client.guilds.cache.size} servers`,
+    () => `🎶 Aryan ki mom`
+  ];
+  let i = 0;
+  setInterval(() => {
+    client.user.setActivity(statuses[i % statuses.length](), {
+      type: ActivityType.Playing
+    });
+    i++;
+  }, 10000);
 });
 
-// Optional DisTube events
-distube.on("playSong", (queue, song) => {
-  queue.textChannel.send(`🎶 Now Playing: **${song.name}** - \`${song.formattedDuration}\``);
-});
-distube.on("addSong", (queue, song) => {
-  queue.textChannel.send(`✅ Added to queue: **${song.name}**`);
-});
-distube.on("finish", queue => {
-  queue.textChannel.send("✅ Queue finished.");
-});
+// 📥 On Message Command (Basic play support)
+client.on('messageCreate', async (message) => {
+  if (message.author.bot || !message.guild) return;
+  const prefix = '.';
 
-// Message Command Handler
-client.on('messageCreate', async message => {
-  if (!message.content.startsWith(PREFIX) || message.author.bot) return;
+  if (!message.content.startsWith(prefix)) return;
 
-  const args = message.content.slice(PREFIX.length).trim().split(/ +/);
-  const commandName = args.shift().toLowerCase();
+  const args = message.content.slice(prefix.length).trim().split(/ +/);
+  const cmd = args.shift().toLowerCase();
 
-  const command = client.commands.get(commandName);
-  if (command) {
-    try {
-      await command.execute(message, args, client);
-    } catch (err) {
-      console.error(err);
-      message.channel.send("❌ Error while executing the command.");
-    }
+  if (cmd === 'play') {
+    if (!args.length) return message.channel.send('Please provide a song name or URL.');
+    distube.play(message.member.voice.channel, args.join(' '), {
+      textChannel: message.channel,
+      member: message.member
+    });
+  }
+
+  if (cmd === 'stop') {
+    distube.stop(message);
+    message.channel.send('⏹️ Music stopped!');
+  }
+
+  if (cmd === 'skip') {
+    distube.skip(message);
+    message.channel.send('⏭️ Skipped!');
   }
 });
 
-// ✅ Rotating Playing Status
-client.once('ready', () => {
-  console.log(`✅ Logged in as ${client.user.tag}`);
+// 🪵 DisTube Events (optional)
+distube
+  .on('playSong', (queue, song) =>
+    queue.textChannel.send(`▶️ Now playing: \`${song.name}\``)
+  )
+  .on('addSong', (queue, song) =>
+    queue.textChannel.send(`➕ Added to queue: \`${song.name}\``)
+  )
+  .on('error', (channel, error) => {
+    console.error(error);
+    if (channel) channel.send(`❌ Error: \`${error.message}\``);
+  });
 
-  let index = 0;
-  const statuses = [
-    () => `Serving ${client.guilds.cache.reduce((a, g) => a + g.memberCount, 0)} users 👥`,
-    () => 'Aryan ki mom 👀'
-  ];
-
-  setInterval(() => {
-    const status = statuses[index % statuses.length]();
-    client.user.setActivity(status, { type: 'PLAYING' });
-    index++;
-  }, 10000); // every 10 seconds
-});
-
-// 🔐 Login with environment variable
 client.login(process.env.DISCORD_TOKEN);
