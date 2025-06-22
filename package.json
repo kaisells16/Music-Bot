@@ -16,7 +16,7 @@
   "author": "Yash",
   "license": "MIT",
   "engines": {
-    "node": "18.x"
+    "node": "20.x"
   },
   "dependencies": {
     "discord.js": "^14.13.0",
