@@ -9,6 +9,6 @@
     "discord.js": "^14.13.0",
     "distube": "^4.2.0",
     "@distube/spotify": "^1.4.2",
-    "@distube/ytdl-core": "^1.1.1"
+    "ytdl-core": "^4.11.0"
   }
 }
