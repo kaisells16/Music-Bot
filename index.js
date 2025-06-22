@@ -2,7 +2,7 @@ const { Client, GatewayIntentBits, Collection } = require('discord.js');
 const { DisTube } = require('distube');
 const { SpotifyPlugin } = require('@distube/spotify');
 
-const PREFIX = '.'; // Custom prefix
+const PREFIX = '.'; // Custom prefix for commands
 
 const client = new Client({
   intents: [
@@ -13,13 +13,13 @@ const client = new Client({
   ]
 });
 
-// Load commands
+// Load command files
 client.commands = new Collection();
 ['play', 'pause', 'resume', 'skip', 'queue', 'stop'].forEach(cmd => {
   client.commands.set(cmd, require(`./commands/${cmd}.js`));
 });
 
-// ✅ DisTube Setup without Spotify API (Option 1)
+// ✅ DisTube setup WITHOUT Spotify API
 const distube = new DisTube(client, {
   emitNewSongOnly: true,
   leaveOnEmpty: true,
@@ -34,13 +34,13 @@ const distube = new DisTube(client, {
 
 client.distube = distube;
 
-// ✅ DisTube error handler
+// ✅ DisTube Error Handling
 distube.on("error", (channel, error) => {
   console.error("❌ DisTube Error:", error);
   if (channel) channel.send("⚠️ Error while playing music.");
 });
 
-// ✅ Optional: Log music activity
+// Optional DisTube events
 distube.on("playSong", (queue, song) => {
   queue.textChannel.send(`🎶 Now Playing: **${song.name}** - \`${song.formattedDuration}\``);
 });
@@ -51,7 +51,7 @@ distube.on("finish", queue => {
   queue.textChannel.send("✅ Queue finished.");
 });
 
-// ✅ Handle messages
+// Message Command Handler
 client.on('messageCreate', async message => {
   if (!message.content.startsWith(PREFIX) || message.author.bot) return;
 
@@ -69,7 +69,7 @@ client.on('messageCreate', async message => {
   }
 });
 
-// ✅ Rotating bot status
+// ✅ Rotating Playing Status
 client.once('ready', () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
 
